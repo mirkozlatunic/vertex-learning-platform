@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary */
+  --color-primary-500: #f97316;
+  --color-primary-400: #fb923c;
+  --color-primary-300: #fdba74;
+  --color-primary-200: #fed7aa;
+  --color-primary-100: #ffeee5;
+
+  /* Neutral */
+  --color-neutral-900: #0f172a;
+  --color-neutral-700: #33415f;
+  --color-neutral-500: #64748b;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-50: #fafafc;
+  --color-white: #ffffff;
+
+  /* Radius */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.1);
+  --shadow-xl: 0 20px 40px -8px rgba(15, 23, 42, 0.12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primary-500: var(--color-primary-500);
+  --color-primary-400: var(--color-primary-400);
+  --color-primary-300: var(--color-primary-300);
+  --color-primary-200: var(--color-primary-200);
+  --color-primary-100: var(--color-primary-100);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  --color-neutral-900: var(--color-neutral-900);
+  --color-neutral-700: var(--color-neutral-700);
+  --color-neutral-500: var(--color-neutral-500);
+  --color-neutral-300: var(--color-neutral-300);
+  --color-neutral-200: var(--color-neutral-200);
+  --color-neutral-100: var(--color-neutral-100);
+  --color-neutral-50: var(--color-neutral-50);
+  --color-white: var(--color-white);
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+
+  --text-display-1: 48px;
+  --text-display-1--line-height: 56px;
+  --text-display-1--font-weight: 700;
+
+  --text-display-2: 36px;
+  --text-display-2--line-height: 44px;
+  --text-display-2--font-weight: 700;
+
+  --text-heading-1: 28px;
+  --text-heading-1--line-height: 36px;
+  --text-heading-1--font-weight: 600;
+
+  --text-heading-2: 22px;
+  --text-heading-2--line-height: 30px;
+  --text-heading-2--font-weight: 600;
+
+  --text-heading-3: 18px;
+  --text-heading-3--line-height: 26px;
+  --text-heading-3--font-weight: 500;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-body-lg--font-weight: 400;
+
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+  --text-body--font-weight: 400;
+
+  --text-small: 12px;
+  --text-small--line-height: 16px;
+  --text-small--font-weight: 400;
 }
