@@ -1,4 +1,5 @@
-import { Bell, User } from "lucide-react";
+import { Bell } from "lucide-react";
+import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/cn";
 import { Logo } from "@/components/brand/Logo";
 import { Icon } from "@/components/ui/Icon";
@@ -42,9 +43,27 @@ export function Navbar({ className }: NavbarProps) {
         >
           <Icon icon={Bell} size={20} />
         </button>
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-200 text-neutral-500">
-          <Icon icon={User} size={18} />
-        </span>
+        <Show when="signed-out">
+          <SignInButton>
+            <button
+              type="button"
+              className="text-sm font-medium font-sans text-neutral-700 hover:text-neutral-900"
+            >
+              Sign in
+            </button>
+          </SignInButton>
+          <SignUpButton>
+            <button
+              type="button"
+              className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium font-sans text-white hover:bg-neutral-800"
+            >
+              Sign up
+            </button>
+          </SignUpButton>
+        </Show>
+        <Show when="signed-in">
+          <UserButton />
+        </Show>
       </div>
     </nav>
   );
