@@ -29,6 +29,7 @@ export const module_ = defineType({
   ],
   preview: {
     select: { title: 'title', lessons: 'lessons' },
+    /** Builds a Studio preview with the module title and pluralized lesson count. */
     prepare({ title, lessons }) {
       const count = Array.isArray(lessons) ? lessons.length : 0
       return { title, subtitle: `${count} lesson${count === 1 ? '' : 's'}` }

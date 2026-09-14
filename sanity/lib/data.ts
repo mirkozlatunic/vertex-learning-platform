@@ -9,26 +9,42 @@ import {
   LESSON_BY_SLUG_QUERY,
 } from './queries'
 
+/** Fetches published courses in title order with their instructor and category details. */
 export async function getCourses() {
   return client.fetch(COURSES_QUERY)
 }
 
+/**
+ * Fetches a published course by slug, including its outcomes and ordered modules.
+ *
+ * Lesson references in each module are resolved. Returns `null` when no course matches.
+ */
 export async function getCourseBySlug(slug: string) {
   const course = await client.fetch(COURSE_BY_SLUG_QUERY, { slug })
   return course ?? null
 }
 
+/** Fetches published categories in title order. */
 export async function getCategories() {
   return client.fetch(CATEGORIES_QUERY)
 }
 
+/**
+ * Fetches a published instructor by slug together with courses that reference them.
+ *
+ * Returns `null` when no instructor matches.
+ */
 export async function getInstructorBySlug(slug: string) {
   const instructor = await client.fetch(INSTRUCTOR_BY_SLUG_QUERY, { slug })
   return instructor ?? null
 }
 
 /**
- * Module/lesson numbers (e.g. "Lesson 5.1") are derived from array order, never stored.
+ * Fetches a published lesson by slug and derives its location within the containing course.
+ *
+ * The module title and one-based module and lesson numbers come from array order. They remain
+ * `null` when the lesson is not referenced by a course module. Returns `null` when no lesson
+ * matches the slug.
  */
 export async function getLessonBySlug(slug: string) {
   const lesson = await client.fetch(LESSON_BY_SLUG_QUERY, { slug })

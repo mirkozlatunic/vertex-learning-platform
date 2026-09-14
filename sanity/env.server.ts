@@ -6,6 +6,7 @@ export const apiReadToken = assertValue(
   'Missing environment variable: SANITY_API_READ_TOKEN'
 )
 
+/** Returns a defined value or throws an error with the supplied message. */
 function assertValue<T>(v: T | undefined, errorMessage: string): T {
   if (v === undefined) {
     throw new Error(errorMessage)
