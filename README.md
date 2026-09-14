@@ -1,5 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Two workspaces
+
+This repo has two independent npm workspaces:
+
+- **Repo root** — the Next.js web app (`npm run dev`, http://localhost:3000).
+- **`studio/`** — the standalone Sanity Studio (`npm --prefix studio install`, then `npm --prefix studio run dev`, http://localhost:3333). Run `npm --prefix studio run typegen` after schema changes to regenerate `sanity.types.ts` at the repo root.
+
 ## Getting Started
 
 First, run the development server:
