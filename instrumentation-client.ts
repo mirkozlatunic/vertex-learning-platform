@@ -19,7 +19,7 @@ if (!posthogToken) {
   posthog.init(posthogToken, {
     api_host: posthogHost,
     defaults: "2026-05-30",
-    capture_exceptions: true,
+    capture_exceptions: process.env.NODE_ENV === "production",
     debug: process.env.NODE_ENV === "development",
   });
 }
