@@ -1,44 +1,17 @@
+import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 import { Navbar } from "@/components/brand/Navbar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { CourseCard } from "@/components/ui/CourseCard";
+import { CourseCardLink } from "@/components/ui/CourseCardLink";
 import { Icon } from "@/components/ui/Icon";
-
-const courses = [
-  {
-    initial: "N",
-    iconClassName: "bg-neutral-900 text-white",
-    title: "Next.js for Production",
-    description: "Build scalable, high-performance web applications with Next.js.",
-    level: "Intermediate",
-    duration: "18h 24m",
-    moduleCount: 12,
-  },
-  {
-    initial: "🐳",
-    iconClassName: "bg-white border border-neutral-200 text-2xl",
-    title: "Docker Essentials",
-    description: "Containerize applications and streamline your development workflow.",
-    level: "Beginner",
-    duration: "10h 12m",
-    moduleCount: 8,
-  },
-  {
-    initial: "TS",
-    iconClassName: "bg-blue-600 text-white",
-    title: "TypeScript Deep Dive",
-    description: "Go beyond the basics and write safer, more expressive code.",
-    level: "Intermediate",
-    duration: "14h 36m",
-    moduleCount: 10,
-  },
-];
+import { getCourses } from "@/sanity/lib/data";
 
 const barHeights = [40, 64, 96, 56, 128, 72, 104, 48, 88, 120, 60];
 
-export default function Home() {
+export default async function Home() {
+  const courses = (await getCourses()).slice(0, 3);
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50">
       <Navbar />
@@ -67,28 +40,32 @@ export default function Home() {
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 flex items-center justify-between">
               <h2 className="font-display text-display-2 text-neutral-900">All Courses</h2>
-              <a
+              <Link
                 href="/courses"
                 className="inline-flex items-center gap-1.5 text-sm font-medium font-sans text-primary-500 hover:text-primary-400"
               >
                 View all courses
                 <Icon icon={ArrowRight} size={16} />
-              </a>
+              </Link>
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {courses.map((course) => (
-                <CourseCard key={course.title} {...course} />
+                <CourseCardLink key={course._id} course={course} />
               ))}
             </div>
           </div>
         </section>
 
         <section className="relative overflow-hidden px-6 pt-8 pb-0 sm:px-10">
-          <div className="mx-auto flex max-w-xl items-center justify-center gap-2 border-t border-neutral-200 pt-8">
-            <Icon icon={Star} size={16} className="text-primary-400" />
-            <p className="text-body font-sans text-neutral-500">
-              New courses and lessons added every week.
-            </p>
+          <div className="mx-auto flex max-w-xl items-center gap-3">
+            <span className="h-px flex-1 bg-neutral-200" aria-hidden />
+            <span className="inline-flex items-center gap-2 whitespace-nowrap">
+              <Icon icon={Star} size={16} className="text-primary-400" />
+              <p className="text-body font-sans text-neutral-500">
+                New courses and lessons added every week.
+              </p>
+            </span>
+            <span className="h-px flex-1 bg-neutral-200" aria-hidden />
           </div>
           <div
             aria-hidden
