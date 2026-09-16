@@ -78,10 +78,13 @@ export const LESSON_BY_SLUG_QUERY = defineQuery(`
       _id,
       title,
       "slug": slug.current,
+      level,
       modules[]{
         _key,
         title,
-        "lessonSlugs": lessons[]->slug.current,
+        lessons[]->{
+          ${lessonCardProjection}
+        },
       },
     },
   }

@@ -34,19 +34,35 @@ export async function getLessonBySlug(slug: string) {
   const lesson = await client.fetch(LESSON_BY_SLUG_QUERY, { slug })
   if (!lesson) return null
 
-  const modules: { title: string; lessonSlugs: string[] }[] = lesson.course?.modules ?? []
+  type SidebarLesson = {
+    _id: string
+    title: string
+    slug: string
+    duration: number
+    freePreview: boolean | null
+  }
+  type SidebarModule = { _key: string; title: string; lessons: SidebarLesson[] }
+
+  const modules: SidebarModule[] = lesson.course?.modules ?? []
+  const flatLessons = modules.flatMap((mod) => mod.lessons)
+  const currentIndex = flatLessons.findIndex((l) => l.slug === slug)
+
   let moduleNumber: number | null = null
   let lessonNumber: number | null = null
   let moduleTitle: string | null = null
 
   modules.forEach((mod, moduleIndex: number) => {
-    const lessonIndex = (mod.lessonSlugs ?? []).indexOf(slug)
+    const lessonIndex = mod.lessons.findIndex((l) => l.slug === slug)
     if (lessonIndex !== -1) {
       moduleNumber = moduleIndex + 1
       lessonNumber = lessonIndex + 1
       moduleTitle = mod.title
     }
   })
+
+  const previousLesson = currentIndex > 0 ? flatLessons[currentIndex - 1] : null
+  const nextLesson =
+    currentIndex !== -1 && currentIndex < flatLessons.length - 1 ? flatLessons[currentIndex + 1] : null
 
   return {
     ...lesson,
@@ -55,10 +71,14 @@ export async function getLessonBySlug(slug: string) {
           _id: lesson.course._id,
           title: lesson.course.title,
           slug: lesson.course.slug,
+          level: lesson.course.level,
+          modules,
         }
       : null,
     moduleNumber,
     lessonNumber,
     moduleTitle,
+    previousLesson,
+    nextLesson,
   }
 }
