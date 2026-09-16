@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell } from "lucide-react";
+import Link from "next/link";
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/cn";
 import { captureEvent } from "@/lib/posthog-client";
@@ -25,7 +26,9 @@ export function Navbar({ className }: NavbarProps) {
       )}
     >
       <div className="flex items-center gap-8">
-        <Logo />
+        <Link href="/">
+          <Logo />
+        </Link>
         <div className="flex items-center gap-6">
           {links.map((link) => (
             <a

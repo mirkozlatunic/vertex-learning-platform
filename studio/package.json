@@ -7,7 +7,8 @@
     "build": "sanity build",
     "deploy": "sanity deploy",
     "start": "sanity start",
-    "typegen": "sanity schema extract --path=schema.json --enforce-required-fields && sanity typegen generate"
+    "typegen": "sanity schema extract --path=schema.json --enforce-required-fields && sanity typegen generate",
+    "ingest:videos": "tsx scripts/ingest-videos.ts"
   },
   "dependencies": {
     "@sanity/icons": "^3",
@@ -18,8 +19,11 @@
     "styled-components": "^6.5.3"
   },
   "devDependencies": {
+    "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5"
+    "tsx": "^4",
+    "typescript": "^5",
+    "youtubei.js": "^18"
   }
 }

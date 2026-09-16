@@ -1,7 +1,7 @@
 import { type HTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-export type BadgeVariant = "video" | "lesson" | "popular" | "outline";
+export type BadgeVariant = "video" | "lesson" | "popular" | "outline" | "neutral";
 
 export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   variant?: BadgeVariant;
@@ -12,6 +12,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   lesson: "bg-neutral-900 text-white",
   popular: "bg-primary-100 text-primary-500",
   outline: "bg-primary-100/60 text-primary-500 border border-primary-200",
+  neutral: "bg-neutral-100 text-neutral-700",
 };
 
 export function Badge({ variant = "lesson", className, children, ...props }: BadgeProps) {
