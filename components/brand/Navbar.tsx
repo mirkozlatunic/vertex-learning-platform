@@ -1,6 +1,9 @@
+"use client";
+
 import { Bell } from "lucide-react";
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/cn";
+import { captureEvent } from "@/lib/posthog-client";
 import { Logo } from "@/components/brand/Logo";
 import { Icon } from "@/components/ui/Icon";
 
@@ -47,6 +50,7 @@ export function Navbar({ className }: NavbarProps) {
           <SignInButton>
             <button
               type="button"
+              onClick={() => captureEvent("sign_in_started", { source: "navbar" })}
               className="text-sm font-medium font-sans text-neutral-700 hover:text-neutral-900"
             >
               Sign in
@@ -55,6 +59,7 @@ export function Navbar({ className }: NavbarProps) {
           <SignUpButton>
             <button
               type="button"
+              onClick={() => captureEvent("sign_up_started", { source: "navbar" })}
               className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium font-sans text-white hover:bg-neutral-800"
             >
               Sign up

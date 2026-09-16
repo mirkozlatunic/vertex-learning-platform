@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, Lock, PlayCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatDuration } from "@/lib/format";
+import { captureEvent } from "@/lib/posthog-client";
 import { Icon } from "@/components/ui/Icon";
 
 export type CourseContentLesson = {
@@ -45,7 +46,15 @@ export function CourseContent({ modules, className }: CourseContentProps) {
           <div key={mod._key}>
             <button
               type="button"
-              onClick={() => setExpanded((prev) => ({ ...prev, [mod._key]: !prev[mod._key] }))}
+              onClick={() => {
+                setExpanded((prev) => ({ ...prev, [mod._key]: !prev[mod._key] }));
+                captureEvent("course_module_toggled", {
+                  module_id: mod._key,
+                  module_index: index + 1,
+                  expanded: !isOpen,
+                  lesson_count: mod.lessons.length,
+                });
+              }}
               aria-expanded={isOpen}
               className="flex w-full items-center gap-4 py-4 text-left"
             >
@@ -79,6 +88,15 @@ export function CourseContent({ modules, className }: CourseContentProps) {
                     <a
                       href={`/lessons/${lesson.slug}`}
                       className="flex items-center gap-3 rounded-sm py-2 pr-2 text-sm font-sans text-neutral-700 hover:bg-neutral-50"
+                      onClick={() =>
+                        captureEvent("lesson_selected", {
+                          lesson_id: lesson._id,
+                          module_id: mod._key,
+                          module_index: index + 1,
+                          lesson_index: lessonIndex + 1,
+                          free_preview: Boolean(lesson.freePreview),
+                        })
+                      }
                     >
                       <Icon
                         icon={lesson.freePreview ? PlayCircle : Lock}
@@ -104,7 +122,13 @@ export function CourseContent({ modules, className }: CourseContentProps) {
         <div className="flex justify-center pt-4">
           <button
             type="button"
-            onClick={() => setShowAll((prev) => !prev)}
+            onClick={() => {
+              setShowAll((prev) => !prev);
+              captureEvent("course_modules_toggled", {
+                expanded: !showAll,
+                module_count: modules.length,
+              });
+            }}
             className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium font-sans text-neutral-700 hover:bg-neutral-100"
           >
             {showAll ? "Show fewer modules" : `Show all ${modules.length} modules`}
