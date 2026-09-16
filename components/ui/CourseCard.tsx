@@ -41,7 +41,7 @@ export function CourseCard({
       </div>
       <h3 className="font-display text-heading-3 text-neutral-900">{title}</h3>
       <p className="mt-1 text-body font-sans text-neutral-500">{description}</p>
-      <div className="mt-4 flex items-center gap-4 text-small font-sans text-neutral-500">
+      <div className="mt-4 flex items-center gap-4 border-t border-neutral-200 pt-4 text-small font-sans text-neutral-500">
         <span className="inline-flex items-center gap-1">
           <Icon icon={BarChart} size={14} />
           {level}
