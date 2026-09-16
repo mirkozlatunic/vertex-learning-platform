@@ -2,7 +2,7 @@
  * Only YouTube is supported: it's the only provider with seeded video URLs.
  * Add Vimeo/Bunny here once both ingestion and an embed case exist for them (AGENTS.md §9).
  */
-export function getYouTubeEmbedUrl(videoUrl: string): string | null {
+export function getYouTubeEmbedUrl(videoUrl: string, startSeconds?: number): string | null {
   let url: URL
   try {
     url = new URL(videoUrl)
@@ -22,5 +22,9 @@ export function getYouTubeEmbedUrl(videoUrl: string): string | null {
   }
 
   if (!videoId) return null;
-  return `https://www.youtube-nocookie.com/embed/${videoId}`;
+  const params = new URLSearchParams({ enablejsapi: "1" });
+  if (startSeconds != null && Number.isFinite(startSeconds) && startSeconds > 0) {
+    params.set("start", String(Math.round(startSeconds)));
+  }
+  return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
 }

@@ -3,8 +3,8 @@ import { ArrowRight, Star } from "lucide-react";
 import { Navbar } from "@/components/brand/Navbar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { CourseCardLink } from "@/components/ui/CourseCardLink";
+import { HeroSearchForm } from "@/components/search/HeroSearchForm";
 import { Icon } from "@/components/ui/Icon";
 import { getCourses } from "@/sanity/lib/data";
 
@@ -27,12 +27,14 @@ export default async function Home() {
             courses.
           </p>
           <div className="mt-8 flex justify-center">
-            <Button variant="primary" icon={<Icon icon={ArrowRight} size={18} />}>
-              Explore Courses
-            </Button>
+            <Link href="/courses">
+              <Button variant="primary" icon={<Icon icon={ArrowRight} size={18} />}>
+                Explore Courses
+              </Button>
+            </Link>
           </div>
           <div className="mx-auto mt-8 max-w-xl">
-            <Input placeholder="Ask anything about your learning..." shortcut="⌘K" />
+            <HeroSearchForm />
           </div>
         </section>
 

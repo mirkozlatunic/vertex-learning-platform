@@ -12,6 +12,10 @@ type PostHogEventName =
   | "lesson_tab_selected"
   | "lesson_video_loaded"
   | "lesson_resource_opened"
+  | "search_performed"
+  | "search_result_selected"
+  | "video_play"
+  | "video_watch_depth"
   | "sign_in_started"
   | "sign_up_started";
 

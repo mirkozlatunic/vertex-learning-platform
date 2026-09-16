@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { ArrowLeft, ArrowRight, BarChart, Bookmark, CheckCircle2, Clock, Lightbulb, Users } from "lucide-react";
 import { getLessonBySlug } from "@/sanity/lib/data";
+import { getCompletedLessonIds, getLessonProgress } from "@/lib/progress";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { Navbar } from "@/components/brand/Navbar";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Badge } from "@/components/ui/Badge";
@@ -15,6 +18,7 @@ import { formatCount, formatDuration } from "@/lib/format";
 
 type LessonPageProps = {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ t?: string }>;
 };
 
 const portableTextComponents: PortableTextComponents = {
@@ -41,15 +45,52 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
   return { title: lesson.title };
 }
 
-export default async function LessonPage({ params }: LessonPageProps) {
+export default async function LessonPage({ params, searchParams }: LessonPageProps) {
   const { slug } = await params;
+  const { t } = await searchParams;
   const lesson = await getLessonBySlug(slug);
   if (!lesson) notFound();
+
+  const { userId } = await auth();
 
   const course = lesson.course;
   const modules = course?.modules ?? [];
   const currentModuleKey =
     modules.find((mod) => mod.lessons.some((l) => l.slug === slug))?._key ?? null;
+
+  let startSeconds = t != null && /^\d+$/.test(t) ? Number(t) : undefined;
+  let startSource: "search" | "resume" | undefined = startSeconds != null ? "search" : undefined;
+  let completedLessonIds = new Set<string>();
+
+  if (userId) {
+    const [progress, completed] = await Promise.all([
+      startSeconds == null ? getLessonProgress(userId, lesson._id) : null,
+      getCompletedLessonIds(userId),
+    ]);
+    completedLessonIds = completed;
+
+    if (
+      progress &&
+      !progress.completed &&
+      progress.positionSeconds != null &&
+      progress.positionSeconds > 5 &&
+      progress.positionSeconds < lesson.duration - 15
+    ) {
+      startSeconds = progress.positionSeconds;
+      startSource = "resume";
+      await captureServerEvent(userId, "resume_used", {
+        lesson_id: lesson._id,
+        course_id: course?._id ?? null,
+        resume_seconds: Math.round(progress.positionSeconds),
+      });
+    }
+  }
+
+  const completedCount = modules
+    .flatMap((mod) => mod.lessons)
+    .filter((l) => completedLessonIds.has(l._id)).length;
+  const totalLessons = modules.flatMap((mod) => mod.lessons).length;
+  const courseProgressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   return (
     <div className="flex min-h-screen flex-col bg-neutral-50">
@@ -63,6 +104,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
             modules={modules}
             currentModuleKey={currentModuleKey}
             currentLessonSlug={slug}
+            completedLessonIds={completedLessonIds}
+            progressPercent={courseProgressPercent}
             className="w-full shrink-0 lg:w-80 lg:border-r"
           />
         ) : null}
@@ -119,6 +162,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
               videoUrl={lesson.videoUrl}
               title={lesson.title}
               lessonId={lesson._id}
+              courseId={course?._id}
+              startSeconds={startSeconds}
+              startSource={startSource}
               className="mt-6"
             />
 
