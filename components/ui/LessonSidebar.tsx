@@ -28,6 +28,8 @@ export type LessonSidebarProps = {
   modules: LessonSidebarModule[];
   currentModuleKey: string | null;
   currentLessonSlug: string;
+  completedLessonIds?: Set<string>;
+  progressPercent?: number;
   className?: string;
 };
 
@@ -37,6 +39,8 @@ export function LessonSidebar({
   modules,
   currentModuleKey,
   currentLessonSlug,
+  completedLessonIds,
+  progressPercent = 0,
   className,
 }: LessonSidebarProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
@@ -65,7 +69,7 @@ export function LessonSidebar({
             <span className="block truncate text-sm font-medium font-sans text-neutral-900">
               {courseTitle}
             </span>
-            <ProgressBar value={0} className="mt-1.5" />
+            <ProgressBar value={progressPercent} className="mt-1.5" />
           </div>
         </a>
       </div>
@@ -147,6 +151,8 @@ export function LessonSidebar({
                           <span className="min-w-0 flex-1 truncate">{lesson.title}</span>
                           {isCurrent ? (
                             <StatusIndicator status="now-playing" className="shrink-0" />
+                          ) : completedLessonIds?.has(lesson._id) ? (
+                            <StatusIndicator status="completed" className="shrink-0" />
                           ) : (
                             <span className="shrink-0 text-xs text-neutral-500">
                               {formatDuration(lesson.duration)}
