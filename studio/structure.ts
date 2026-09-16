@@ -1,6 +1,7 @@
 import { BookIcon, TagIcon, UserIcon } from '@sanity/icons'
 import type { StructureResolver } from 'sanity/structure'
 
+/** Builds Studio navigation with courses, instructors, and categories before other documents. */
 export const structure: StructureResolver = (S) =>
   S.list()
     .title('Content')

@@ -10,6 +10,7 @@ export const apiReadToken = assertValue(
 // checked at request time there, not required for the rest of the app to build/run.
 export const apiWriteToken = process.env.SANITY_API_WRITE_TOKEN
 
+/** Returns a defined value or throws an error with the supplied message. */
 function assertValue<T>(v: T | undefined, errorMessage: string): T {
   if (v === undefined) {
     throw new Error(errorMessage)
