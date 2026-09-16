@@ -79,6 +79,21 @@ function postProgress(
   }).catch(() => {});
 }
 
+/** Like postProgress, but reports success so a caller can retry on failure. Never uses sendBeacon (fire-and-forget only). */
+async function postProgressAwaited(body: Record<string, unknown>): Promise<boolean> {
+  try {
+    const res = await fetch("/api/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      keepalive: true,
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export function VideoPlayer({
   videoUrl,
   title,
@@ -104,6 +119,7 @@ export function VideoPlayer({
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const positionSaveRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastKnownPositionRef = useRef(0);
+  const hasPositionSampleRef = useRef(false);
 
   useEffect(() => {
     if (!embedUrl) return;
@@ -117,7 +133,7 @@ export function VideoPlayer({
     }
 
     function savePosition(useBeacon = false) {
-      if (!isSignedInRef.current) return;
+      if (!isSignedInRef.current || !hasPositionSampleRef.current) return;
       postProgress(
         { lessonId, action: "position", positionSeconds: Math.round(lastKnownPositionRef.current) },
         { useBeacon },
@@ -127,7 +143,9 @@ export function VideoPlayer({
     function markComplete() {
       if (!isSignedInRef.current || completedRef.current) return;
       completedRef.current = true;
-      postProgress({ lessonId, courseId: courseId ?? null, action: "complete" });
+      postProgressAwaited({ lessonId, courseId: courseId ?? null, action: "complete" }).then((ok) => {
+        if (!ok) completedRef.current = false;
+      });
     }
 
     function handleStateChange(event: { data: number }) {
@@ -151,6 +169,7 @@ export function VideoPlayer({
           const current = player.getCurrentTime();
           if (!duration) return;
           lastKnownPositionRef.current = current;
+          hasPositionSampleRef.current = true;
           const percent = (current / duration) * 100;
 
           for (const threshold of WATCH_DEPTH_THRESHOLDS) {

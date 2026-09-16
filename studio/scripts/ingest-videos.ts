@@ -130,20 +130,25 @@ async function fetchTranscriptChunks(
   captionTracks: Array<{ language_code?: string | null; kind?: string | null; base_url?: string | null }>,
 ): Promise<{ chunks: VideoChunk[]; reason?: string }> {
   const english = captionTracks.filter((t) => t.language_code === "en");
-  const track = english.find((t) => t.kind !== "asr") ?? english[0] ?? captionTracks[0];
+  const track = english.find((t) => t.kind !== "asr") ?? english[0];
 
-  if (!track?.base_url) return { chunks: [], reason: "no caption track available" };
+  if (!track?.base_url) return { chunks: [], reason: "no English caption track available" };
 
-  const res = await fetch(track.base_url);
-  if (!res.ok) return { chunks: [], reason: `caption fetch failed (${res.status})` };
+  try {
+    const res = await fetch(track.base_url);
+    if (!res.ok) return { chunks: [], reason: `caption fetch failed (${res.status})` };
 
-  const xml = await res.text();
-  if (!xml.trim()) return { chunks: [], reason: "caption track returned an empty body" };
+    const xml = await res.text();
+    if (!xml.trim()) return { chunks: [], reason: "caption track returned an empty body" };
 
-  const cues = parseCaptionXml(xml);
-  if (cues.length === 0) return { chunks: [], reason: "caption track had no parseable cues" };
+    const cues = parseCaptionXml(xml);
+    if (cues.length === 0) return { chunks: [], reason: "caption track had no parseable cues" };
 
-  return { chunks: chunkCues(cues) };
+    return { chunks: chunkCues(cues) };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { chunks: [], reason: `caption fetch threw (${message})` };
+  }
 }
 
 function extractChapters(info: Awaited<ReturnType<Innertube["getInfo"]>>): VideoChapter[] {

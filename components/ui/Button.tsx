@@ -26,6 +26,16 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: "h-11 px-4 text-base",
 };
 
+/** Shared class builder so a non-`<button>` element (e.g. a `Link`) can look like one without nesting interactive elements. */
+export function buttonClasses(variant: ButtonVariant = "primary", size: ButtonSize = "lg", className?: string) {
+  return cn(
+    "inline-flex items-center justify-center gap-1.5 rounded-md font-medium font-sans transition-colors disabled:cursor-not-allowed",
+    variantClasses[variant],
+    sizeClasses[size],
+    className,
+  );
+}
+
 export function Button({
   variant = "primary",
   size = "lg",
@@ -39,12 +49,7 @@ export function Button({
   return (
     <button
       disabled={disabled}
-      className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-md font-medium font-sans transition-colors disabled:cursor-not-allowed",
-        variantClasses[variant],
-        sizeClasses[size],
-        className,
-      )}
+      className={buttonClasses(variant, size, className)}
       {...props}
     >
       {icon && iconPosition === "left" ? icon : null}

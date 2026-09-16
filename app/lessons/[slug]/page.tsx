@@ -58,7 +58,9 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
   const currentModuleKey =
     modules.find((mod) => mod.lessons.some((l) => l.slug === slug))?._key ?? null;
 
-  let startSeconds = t != null && /^\d+$/.test(t) ? Number(t) : undefined;
+  const parsedT = t != null && /^\d+$/.test(t) ? Number(t) : NaN;
+  let startSeconds =
+    Number.isSafeInteger(parsedT) && parsedT >= 0 && parsedT <= lesson.duration ? parsedT : undefined;
   let startSource: "search" | "resume" | undefined = startSeconds != null ? "search" : undefined;
   let completedLessonIds = new Set<string>();
 

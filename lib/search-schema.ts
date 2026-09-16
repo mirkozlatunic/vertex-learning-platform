@@ -22,11 +22,9 @@ export const searchResultSchema = z.object({
   /** Lesson's "in this lesson you will" points. Null for "video" results. */
   keyPoints: z.array(z.string()).nullable(),
   /**
-   * Video-moment fields. Structurally supported now, but there is no video
-   * document/ingestion pipeline yet (AGENTS.md §8-9), so the model has no
-   * source of matched seconds, clip lengths, or thumbnails to ground this in
-   * — expect these to stay null and `kind` to stay "lesson" until that
-   * pipeline exists.
+   * Video-moment fields, populated for `kind: "video"` results via two-stage
+   * timestamp resolution (chapters first, transcript fallback — AGENTS.md
+   * §7-9). Null for `kind: "lesson"` results.
    */
   matchedSecond: z.number().int().nonnegative().nullable(),
   clipLengthSeconds: z.number().int().positive().nullable(),
