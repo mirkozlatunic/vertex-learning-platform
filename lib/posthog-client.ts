@@ -9,6 +9,9 @@ type PostHogEventName =
   | "course_module_toggled"
   | "course_modules_toggled"
   | "lesson_selected"
+  | "lesson_tab_selected"
+  | "lesson_video_loaded"
+  | "lesson_resource_opened"
   | "sign_in_started"
   | "sign_up_started";
 
