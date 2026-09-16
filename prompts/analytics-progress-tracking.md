@@ -114,12 +114,19 @@ Client-side (`lib/posthog-client.ts`, `posthog-js`):
 | `video_play` | YouTube state → PLAYING, first time per mount | `lesson_id`, `course_id`, `resumed` (bool) |
 | `video_watch_depth` | playback crosses 25/50/75/100% of duration, each once per mount | `lesson_id`, `course_id`, `depth_percent` (25\|50\|75\|100) |
 
-Server-side (`app/api/progress/route.ts`, `posthog-node`):
+Server-side (`posthog-node`):
 
 | event | fires when | properties |
 |---|---|---|
-| `lesson_completed` | POST marks a lesson complete and it wasn't already | `lesson_id`, `course_id` |
-| `resume_used` | GET is served and the response includes a resume position that the lesson page will use (i.e., no `?t=` override) | `lesson_id`, `course_id`, `resume_seconds` |
+| `lesson_completed` | `/api/progress` POST marks a lesson complete and it wasn't already | `lesson_id`, `course_id` |
+| `resume_used` | the lesson page (server component) reads a resume position it will pass to `VideoPlayer` (i.e., no `?t=` override) | `lesson_id`, `course_id`, `resume_seconds` |
+
+**Correction (as-built):** `/api/progress` ended up POST-only — there is no
+GET handler. The lesson page reads saved progress directly via
+`lib/progress.ts`'s `getLessonProgress`/`getCompletedLessonIds` (server-side
+Sanity read, not a round-trip through the progress route) and fires
+`resume_used` itself; the route only ever handles writes (`position` /
+`complete` actions).
 
 All events are `snake_case`, properties are `snake_case`, no PII beyond the
 Clerk user id (which PostHog already has via `identify`). No event carries
@@ -135,8 +142,9 @@ New:
 - `studio/schemaTypes/documents/progress.ts` — progress document schema.
 - `sanity/lib/writeClient.ts` — server-only write client (mirrors `client.ts`).
 - `sanity/env.server.ts` — add `apiWriteToken`.
-- `app/api/progress/route.ts` — GET (read this user's position/completion for
-  a lesson) and POST (save position / mark complete) route handlers.
+- `app/api/progress/route.ts` — POST (save position / mark complete) route
+  handler. (As-built: no GET handler — reads go through `lib/progress.ts`
+  directly from server components, not through this route.)
 - `lib/posthog-server.ts` — thin `posthog-node` wrapper (init once, `capture`,
   `shutdown` on route completion per Vercel serverless guidance from the
   `integration-nextjs-app-router` skill).
@@ -171,9 +179,10 @@ Edited:
 - Write token stays server-only (`sanity/env.server.ts`, never imported by a
   client component) — same pattern as `apiReadToken`.
 - `/api/progress` POST requires `auth()` to return a `userId`; 401 otherwise.
-  GET likewise — no anonymous reads of another user's progress; the document
-  id is derived from the *authenticated* user's id server-side, never taken
-  from the request body/query.
+  (As-built: there is no GET handler — progress reads happen server-side via
+  `lib/progress.ts`, gated by the same `auth()` call already made by the
+  page.) The document id is derived from the *authenticated* user's id
+  server-side, never taken from the request body/query.
 - Progress document id derivation sanitizes the Clerk user id the same way
   AGENTS.md §9 requires for video doc ids (strip characters the datastore
   rejects), even though Clerk ids are already GROQ/Sanity-id-safe today — do

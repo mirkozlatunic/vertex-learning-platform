@@ -40,6 +40,31 @@ function assertWritable(): NonNullable<typeof writeClient> {
   return writeClient;
 }
 
+const MAX_OPTIMISTIC_RETRIES = 3;
+
+/**
+ * Retries a read-modify-write against `doc._rev` so concurrent writers (e.g. a
+ * position save racing the unmount beacon) don't silently clobber each
+ * other's update instead of one losing cleanly and retrying.
+ */
+async function withOptimisticRetry(
+  write: NonNullable<typeof writeClient>,
+  id: string,
+  attempt: (rev: string) => Promise<void>,
+): Promise<void> {
+  for (let i = 0; i < MAX_OPTIMISTIC_RETRIES; i++) {
+    const doc = await write.fetch<{ _rev: string } | null>(`*[_id == $id][0]{_rev}`, { id });
+    const rev = doc?._rev;
+    if (!rev) return;
+    try {
+      await attempt(rev);
+      return;
+    } catch (error) {
+      if (i === MAX_OPTIMISTIC_RETRIES - 1) throw error;
+    }
+  }
+}
+
 async function ensureProgressDoc(userId: string): Promise<string> {
   const id = progressDocId(userId);
   const write = assertWritable();
@@ -61,19 +86,20 @@ export async function saveLessonPosition(
   const write = assertWritable();
   const id = await ensureProgressDoc(userId);
 
-  const doc = await write.fetch<{ lessonPositions: LessonPosition[] } | null>(
-    `*[_id == $id][0]{lessonPositions}`,
-    { id },
-  );
-  const next: LessonPosition[] = (doc?.lessonPositions ?? []).filter((p) => p.lesson._ref !== lessonId);
-  next.push({
-    _key: randomUUID(),
-    lesson: { _type: "reference", _ref: lessonId },
-    positionSeconds,
-    updatedAt: new Date().toISOString(),
+  await withOptimisticRetry(write, id, async (rev) => {
+    const doc = await write.fetch<{ lessonPositions: LessonPosition[] } | null>(
+      `*[_id == $id][0]{lessonPositions}`,
+      { id },
+    );
+    const next: LessonPosition[] = (doc?.lessonPositions ?? []).filter((p) => p.lesson._ref !== lessonId);
+    next.push({
+      _key: randomUUID(),
+      lesson: { _type: "reference", _ref: lessonId },
+      positionSeconds,
+      updatedAt: new Date().toISOString(),
+    });
+    await write.patch(id).ifRevisionId(rev).set({ lessonPositions: next }).commit();
   });
-
-  await write.patch(id).set({ lessonPositions: next }).commit();
 }
 
 /** Returns whether this lesson was newly marked complete (false if it already was). */
@@ -81,21 +107,30 @@ export async function markLessonComplete(userId: string, lessonId: string): Prom
   const write = assertWritable();
   const id = await ensureProgressDoc(userId);
 
-  const doc = await write.fetch<{ completedLessons: CompletedLesson[] } | null>(
-    `*[_id == $id][0]{completedLessons}`,
-    { id },
-  );
-  const existing = doc?.completedLessons ?? [];
-  if (existing.some((c) => c.lesson._ref === lessonId)) return false;
+  let wasNewlyCompleted = false;
 
-  const next: CompletedLesson[] = [
-    ...existing,
-    {
-      _key: randomUUID(),
-      lesson: { _type: "reference", _ref: lessonId },
-      completedAt: new Date().toISOString(),
-    },
-  ];
-  await write.patch(id).set({ completedLessons: next }).commit();
-  return true;
+  await withOptimisticRetry(write, id, async (rev) => {
+    const doc = await write.fetch<{ completedLessons: CompletedLesson[] } | null>(
+      `*[_id == $id][0]{completedLessons}`,
+      { id },
+    );
+    const existing = doc?.completedLessons ?? [];
+    if (existing.some((c) => c.lesson._ref === lessonId)) {
+      wasNewlyCompleted = false;
+      return;
+    }
+
+    const next: CompletedLesson[] = [
+      ...existing,
+      {
+        _key: randomUUID(),
+        lesson: { _type: "reference", _ref: lessonId },
+        completedAt: new Date().toISOString(),
+      },
+    ];
+    await write.patch(id).ifRevisionId(rev).set({ completedLessons: next }).commit();
+    wasNewlyCompleted = true;
+  });
+
+  return wasNewlyCompleted;
 }

@@ -28,6 +28,10 @@ export async function captureServerEvent(
 ) {
   const ph = getClient();
   if (!ph) return;
-  ph.capture({ distinctId, event, properties });
-  await ph.flush();
+  try {
+    ph.capture({ distinctId, event, properties });
+    await ph.flush();
+  } catch (error) {
+    console.error("captureServerEvent failed", event, error);
+  }
 }
