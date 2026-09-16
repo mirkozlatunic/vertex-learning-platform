@@ -1,6 +1,9 @@
+"use client";
+
 import { CourseCard } from "@/components/ui/CourseCard";
 import { urlFor } from "@/sanity/lib/image";
 import { formatDuration } from "@/lib/format";
+import { captureEvent } from "@/lib/posthog-client";
 import type { COURSES_QUERY_RESULT } from "@/sanity.types";
 
 export type CourseCardLinkProps = {
@@ -9,7 +12,17 @@ export type CourseCardLinkProps = {
 
 export function CourseCardLink({ course }: CourseCardLinkProps) {
   return (
-    <a href={`/courses/${course.slug}`} className="block">
+    <a
+      href={`/courses/${course.slug}`}
+      className="block"
+      onClick={() =>
+        captureEvent("course_selected", {
+          course_id: course._id,
+          course_level: course.level,
+          module_count: course.moduleCount ?? 0,
+        })
+      }
+    >
       <CourseCard
         initial={
           course.coverImage ? (
