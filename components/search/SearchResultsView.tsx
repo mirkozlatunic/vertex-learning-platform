@@ -26,15 +26,19 @@ export function SearchResultsView() {
 
   const [inputValue, setInputValue] = useState(query);
   const [syncedQuery, setSyncedQuery] = useState(query);
-  if (query !== syncedQuery) {
-    setSyncedQuery(query);
-    setInputValue(query);
-  }
-
   const [sort, setSort] = useState<SortOption>("relevant");
   const [response, setResponse] = useState<SearchResponse | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [retryKey, setRetryKey] = useState(0);
+
+  if (query !== syncedQuery) {
+    setSyncedQuery(query);
+    setInputValue(query);
+    if (!query) {
+      setResponse(null);
+      setStatus("idle");
+    }
+  }
 
   useEffect(() => {
     if (!query) return;

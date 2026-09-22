@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 import { Navbar } from "@/components/brand/Navbar";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { buttonClasses } from "@/components/ui/Button";
 import { CourseCardLink } from "@/components/ui/CourseCardLink";
 import { HeroSearchForm } from "@/components/search/HeroSearchForm";
 import { Icon } from "@/components/ui/Icon";
@@ -27,10 +27,9 @@ export default async function Home() {
             courses.
           </p>
           <div className="mt-8 flex justify-center">
-            <Link href="/courses">
-              <Button variant="primary" icon={<Icon icon={ArrowRight} size={18} />}>
-                Explore Courses
-              </Button>
+            <Link href="/courses" className={buttonClasses("primary", "lg")}>
+              Explore Courses
+              <Icon icon={ArrowRight} size={18} />
             </Link>
           </div>
           <div className="mx-auto mt-8 max-w-xl">

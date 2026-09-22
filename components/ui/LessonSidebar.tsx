@@ -149,10 +149,10 @@ export function LessonSidebar({
                           }
                         >
                           <span className="min-w-0 flex-1 truncate">{lesson.title}</span>
-                          {isCurrent ? (
-                            <StatusIndicator status="now-playing" className="shrink-0" />
-                          ) : completedLessonIds?.has(lesson._id) ? (
+                          {completedLessonIds?.has(lesson._id) ? (
                             <StatusIndicator status="completed" className="shrink-0" />
+                          ) : isCurrent ? (
+                            <StatusIndicator status="now-playing" className="shrink-0" />
                           ) : (
                             <span className="shrink-0 text-xs text-neutral-500">
                               {formatDuration(lesson.duration)}

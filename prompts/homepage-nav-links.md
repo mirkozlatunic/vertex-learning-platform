@@ -25,11 +25,13 @@ Two dead UI elements:
 - Wrap `<Logo />` in `Navbar.tsx` with a plain `<a href="/">` (matching the
   existing plain-`<a>` convention used by the other nav links in the same
   file, rather than introducing `next/link` there).
-- Wrap the hero `Button` in `app/page.tsx` with `next/link`'s `<Link
-  href="/courses">` (the file already imports and uses `Link` for "View all
-  courses"), so `Button` keeps rendering as a `<button>` inside an `<a>`.
+- Make the hero CTA in `app/page.tsx` a single `next/link` `<Link
+  href="/courses">` styled with the `Button` component's classes (exported as
+  `buttonClasses` from `components/ui/Button.tsx`), rather than nesting a
+  `<button>` inside an `<a>` — nested interactive elements are invalid HTML
+  and were flagged in a later review.
 
-No visual change — same markup, just made clickable.
+Same visual appearance, one interactive element instead of two nested ones.
 
 ## Files to touch
 
